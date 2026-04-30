@@ -1,0 +1,31 @@
+{
+  "name": "sentria-backend",
+  "version": "1.0.0",
+  "description": "Sentria — Occupational Health Management Platform (Cabinet SST Dr Latoundji)",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js",
+    "db:init": "psql $DATABASE_URL -f server/db/schema.sql",
+    "db:seed": "psql $DATABASE_URL -f server/db/seed.sql"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "docx": "^8.5.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.3",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "node-fetch": "^3.3.2",
+    "pg": "^8.11.5",
+    "resend": "^3.2.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
