@@ -1,0 +1,5 @@
+[phases.setup]
+nixPkgs = ["libreoffice", "font-montserrat"]
+
+[start]
+cmd = "npm start"
