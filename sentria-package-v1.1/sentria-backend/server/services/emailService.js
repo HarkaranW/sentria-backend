@@ -46,4 +46,34 @@ async function sendInvoiceEmail({ to, facture, medecin }) {
   });
 }
 
-module.exports = { sendInvoiceEmail };
+async function sendPasswordResetEmail({ to, resetUrl }) {
+  await resend.emails.send({
+    from: `${process.env.FROM_NAME || 'Cabinet SST'} <${process.env.FROM_EMAIL || 'noreply@sentria.io'}>`,
+    to,
+    subject: 'Réinitialisation de votre mot de passe — Cabinet SST',
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+        <div style="background:#1a3a52;padding:20px 24px;border-radius:8px 8px 0 0;">
+          <div style="color:#fff;font-size:18px;font-weight:700;">Cabinet SST</div>
+          <div style="color:rgba(255,255,255,.6);font-size:12px;">Médecine du travail</div>
+        </div>
+        <div style="background:#fff;padding:28px 24px;border:1px solid #e2e8ed;border-top:none;border-radius:0 0 8px 8px;">
+          <p style="color:#333;font-size:14px;">Bonjour,</p>
+          <p style="color:#333;font-size:14px;line-height:1.6;">
+            Vous avez demandé la réinitialisation de votre mot de passe.<br>
+            Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe. Ce lien est valable <strong>1 heure</strong>.
+          </p>
+          <div style="text-align:center;margin:28px 0;">
+            <a href="${resetUrl}" style="background:#1a3a52;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:700;">Réinitialiser mon mot de passe</a>
+          </div>
+          <p style="color:#888;font-size:12px;line-height:1.6;">
+            Si vous n'avez pas demandé cette réinitialisation, ignorez cet email — votre mot de passe ne sera pas modifié.<br>
+            Lien alternatif : <a href="${resetUrl}" style="color:#1a3a52;">${resetUrl}</a>
+          </p>
+        </div>
+      </div>
+    `,
+  });
+}
+
+module.exports = { sendInvoiceEmail, sendPasswordResetEmail };

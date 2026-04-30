@@ -344,12 +344,34 @@ html,body{height:100%;font-family:'Montserrat',sans-serif;background:#f0f2f5;ove
 <!-- LOGIN -->
 <div class="login active" id="login-screen">
   <div><div class="brand-badge">S</div><div class="brand-title">Cabinet SST — Dr Latoundji</div><div class="brand-sub">Médecine du travail &amp; Prévention des risques · Lomé, Togo</div></div>
-  <div class="login-box">
+  <div class="login-box" id="login-box">
     <h2>Connexion</h2>
     <div style="margin-bottom:12px;"><label style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px;">Email</label><input id="login-email" type="email" placeholder="slatoundji@protonmail.com" onkeydown="if(event.key==='Enter')doLogin()" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--r);font-size:12px;font-family:inherit;background:var(--card);color:var(--text);outline:none;"></div>
     <div style="margin-bottom:14px;"><label style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px;">Mot de passe</label><input id="login-pwd" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--r);font-size:12px;font-family:inherit;background:var(--card);color:var(--text);outline:none;"></div>
     <div id="login-err" style="display:none;color:var(--red);font-size:11px;font-weight:600;margin-bottom:10px;padding:8px 12px;background:var(--red3);border-radius:6px;"></div>
     <button id="login-btn" onclick="doLogin()" style="width:100%;padding:11px;background:var(--navy);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;transition:opacity .15s;">Se connecter</button>
+    <div style="text-align:center;margin-top:12px;"><button onclick="showResetRequest()" style="background:none;border:none;color:var(--text2);font-size:11px;font-family:inherit;cursor:pointer;text-decoration:underline;padding:0;">Mot de passe oublié ?</button></div>
+  </div>
+  <div class="login-box" id="reset-request-box" style="display:none;">
+    <h2>Réinitialisation</h2>
+    <p style="font-size:11px;color:var(--text2);margin-bottom:14px;line-height:1.5;">Entrez votre adresse email. Si elle est connue, vous recevrez un lien pour créer un nouveau mot de passe (valable 1 heure).</p>
+    <div style="margin-bottom:12px;"><label style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px;">Email</label><input id="reset-req-email" type="email" placeholder="votre@email.com" onkeydown="if(event.key==='Enter')doResetRequest()" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--r);font-size:12px;font-family:inherit;background:var(--card);color:var(--text);outline:none;"></div>
+    <div id="reset-req-msg" style="display:none;font-size:11px;font-weight:600;margin-bottom:10px;padding:8px 12px;border-radius:6px;"></div>
+    <button id="reset-req-btn" onclick="doResetRequest()" style="width:100%;padding:11px;background:var(--navy);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;transition:opacity .15s;">Envoyer le lien</button>
+    <div style="text-align:center;margin-top:12px;"><button onclick="showLogin()" style="background:none;border:none;color:var(--text2);font-size:11px;font-family:inherit;cursor:pointer;text-decoration:underline;padding:0;">← Retour à la connexion</button></div>
+  </div>
+</div>
+
+<!-- RESET PASSWORD CONFIRM -->
+<div class="login" id="reset-confirm-screen">
+  <div><div class="brand-badge">S</div><div class="brand-title">Cabinet SST — Dr Latoundji</div><div class="brand-sub">Médecine du travail &amp; Prévention des risques · Lomé, Togo</div></div>
+  <div class="login-box">
+    <h2>Nouveau mot de passe</h2>
+    <p style="font-size:11px;color:var(--text2);margin-bottom:14px;line-height:1.5;">Choisissez un nouveau mot de passe (minimum 8 caractères).</p>
+    <div style="margin-bottom:12px;"><label style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px;">Nouveau mot de passe</label><input id="reset-pwd" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doResetConfirm()" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--r);font-size:12px;font-family:inherit;background:var(--card);color:var(--text);outline:none;"></div>
+    <div style="margin-bottom:14px;"><label style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px;">Confirmer le mot de passe</label><input id="reset-pwd2" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doResetConfirm()" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--r);font-size:12px;font-family:inherit;background:var(--card);color:var(--text);outline:none;"></div>
+    <div id="reset-conf-err" style="display:none;color:var(--red);font-size:11px;font-weight:600;margin-bottom:10px;padding:8px 12px;background:var(--red3);border-radius:6px;"></div>
+    <button id="reset-conf-btn" onclick="doResetConfirm()" style="width:100%;padding:11px;background:var(--navy);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;transition:opacity .15s;">Enregistrer le mot de passe</button>
   </div>
 </div>
 
@@ -992,6 +1014,63 @@ async function doLogin(){
   }catch(e){
     errEl.textContent='Impossible de joindre le serveur — est-il démarré ?';errEl.style.display='block';
   }finally{btn.textContent='Se connecter';btn.disabled=false;}
+}
+
+function showResetRequest(){
+  document.getElementById('login-box').style.display='none';
+  document.getElementById('reset-request-box').style.display='';
+  const msg=document.getElementById('reset-req-msg');if(msg)msg.style.display='none';
+  const btn=document.getElementById('reset-req-btn');if(btn)btn.style.display='';
+  const inp=document.getElementById('reset-req-email');if(inp)inp.value='';
+}
+function showLogin(){
+  document.getElementById('reset-request-box').style.display='none';
+  document.getElementById('login-box').style.display='';
+}
+async function doResetRequest(){
+  const emailEl=document.getElementById('reset-req-email');
+  const msgEl=document.getElementById('reset-req-msg');
+  const btn=document.getElementById('reset-req-btn');
+  const email=(emailEl?.value||'').trim();
+  if(!email){msgEl.style.cssText='display:block;color:var(--red);background:var(--red3);padding:8px 12px;border-radius:6px;';msgEl.textContent='Email requis';return;}
+  btn.textContent='Envoi…';btn.disabled=true;
+  try{
+    await fetch('/api/v1/auth/reset-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+    msgEl.style.cssText='display:block;color:var(--teal);background:var(--teal3);padding:8px 12px;border-radius:6px;font-size:11px;font-weight:600;';
+    msgEl.textContent='Lien envoyé — vérifiez votre boîte mail (et les spams).';
+    btn.style.display='none';
+  }catch(e){
+    msgEl.style.cssText='display:block;color:var(--red);background:var(--red3);padding:8px 12px;border-radius:6px;font-size:11px;font-weight:600;';
+    msgEl.textContent='Impossible de joindre le serveur.';
+  }finally{btn.textContent='Envoyer le lien';btn.disabled=false;}
+}
+
+let _resetToken='';
+function showResetConfirm(token){
+  _resetToken=token;
+  document.getElementById('login-screen').classList.remove('active');
+  document.getElementById('reset-confirm-screen').classList.add('active');
+}
+async function doResetConfirm(){
+  const pwd=document.getElementById('reset-pwd')?.value||'';
+  const pwd2=document.getElementById('reset-pwd2')?.value||'';
+  const errEl=document.getElementById('reset-conf-err');
+  const btn=document.getElementById('reset-conf-btn');
+  if(pwd.length<8){errEl.textContent='Minimum 8 caractères';errEl.style.display='block';return;}
+  if(pwd!==pwd2){errEl.textContent='Les mots de passe ne correspondent pas';errEl.style.display='block';return;}
+  btn.textContent='Enregistrement…';btn.disabled=true;errEl.style.display='none';
+  try{
+    const res=await fetch('/api/v1/auth/reset-password/confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:_resetToken,newPassword:pwd})});
+    const json=await res.json();
+    if(!json.success){errEl.textContent=json.error||'Lien invalide ou expiré';errEl.style.display='block';return;}
+    window.history.replaceState({},'','/');
+    document.getElementById('reset-confirm-screen').classList.remove('active');
+    document.getElementById('login-screen').classList.add('active');
+    showLogin();
+    toast('✓ Mot de passe mis à jour — connectez-vous','var(--teal)');
+  }catch(e){
+    errEl.textContent='Impossible de joindre le serveur.';errEl.style.display='block';
+  }finally{btn.textContent='Enregistrer le mot de passe';btn.disabled=false;}
 }
 
 function initApp(){
@@ -2397,6 +2476,9 @@ async function genRapportFactExport(){
 
 // ══ INIT ══
 (async()=>{
+  const params=new URLSearchParams(window.location.search);
+  const resetToken=params.get('reset_token');
+  if(resetToken){showResetConfirm(resetToken);return;}
   const token=sessionStorage.getItem('sentria_token');
   if(!token)return;
   try{

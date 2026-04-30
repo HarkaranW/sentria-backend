@@ -2,8 +2,10 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const pool = require('../db/pool');
 const authMiddleware = require('../middleware/auth');
+const { sendPasswordResetEmail } = require('../services/emailService');
 
 const router = express.Router();
 
@@ -57,13 +59,56 @@ router.post('/change-password', authMiddleware, async (req, res) => {
   }
 });
 
-// POST /api/v1/auth/reset-password — sends reset email (stub, wire to Resend)
+// POST /api/v1/auth/reset-password — request a password reset email
 router.post('/reset-password', async (req, res) => {
   const { email } = req.body;
-  // TODO: generate reset token, store in DB, send email via Resend
-  // For now just acknowledge — never reveal if email exists (security)
-  console.log('Password reset requested for:', email);
-  res.json({ success: true, data: { message: 'Si cet email existe, un lien de réinitialisation a été envoyé.' } });
+  if (!email)
+    return res.status(400).json({ success: false, error: 'Email requis' });
+  try {
+    const { rows } = await pool.query(
+      'SELECT id FROM users WHERE email = $1 AND is_active = true',
+      [email.toLowerCase().trim()]
+    );
+    if (rows.length) {
+      const token = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+      await pool.query('DELETE FROM password_reset_tokens WHERE user_id = $1', [rows[0].id]);
+      await pool.query(
+        'INSERT INTO password_reset_tokens (user_id, token, expires_at) VALUES ($1, $2, $3)',
+        [rows[0].id, token, expiresAt]
+      );
+      const baseUrl = process.env.APP_URL || 'http://localhost:3000';
+      await sendPasswordResetEmail({ to: email.toLowerCase().trim(), resetUrl: `${baseUrl}/?reset_token=${token}` });
+    }
+    // Always return the same response — never reveal whether email exists
+    return res.json({ success: true, data: { message: 'Si cet email existe, un lien de réinitialisation a été envoyé.' } });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, error: 'Erreur serveur' });
+  }
+});
+
+// POST /api/v1/auth/reset-password/confirm — set new password using reset token
+router.post('/reset-password/confirm', async (req, res) => {
+  const { token, newPassword } = req.body;
+  if (!token || !newPassword || newPassword.length < 8)
+    return res.status(400).json({ success: false, error: 'Token et mot de passe (minimum 8 caractères) requis' });
+  try {
+    const { rows } = await pool.query(
+      'SELECT user_id FROM password_reset_tokens WHERE token = $1 AND expires_at > NOW()',
+      [token]
+    );
+    if (!rows.length)
+      return res.status(400).json({ success: false, error: 'Lien invalide ou expiré' });
+    const userId = rows[0].user_id;
+    const hash = await bcrypt.hash(newPassword, 12);
+    await pool.query('UPDATE users SET password = $1 WHERE id = $2', [hash, userId]);
+    await pool.query('DELETE FROM password_reset_tokens WHERE user_id = $1', [userId]);
+    return res.json({ success: true, data: { message: 'Mot de passe mis à jour. Vous pouvez vous connecter.' } });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, error: 'Erreur serveur' });
+  }
 });
 
 module.exports = router;
