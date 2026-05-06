@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ════════════════════════════════════════════════════════
 // SENTRIA — Module DUER
 // Fichier à intégrer dans le HTML déployé
@@ -58,6 +59,30 @@ let CUR = { client: null, unit: null };
 let DUER_VIEW = 'list';
 let EDIT_RISK = null;
 
+// ── PANEL HELPERS ────────────────────────────────────────
+let _duerSavedFooter = null;
+
+function duerOpenPanel(title, sub, bodyHTML, footerHTML) {
+  document.getElementById('fp-title').textContent = title;
+  document.getElementById('fp-sub').textContent = sub;
+  document.getElementById('fp-content').innerHTML = bodyHTML;
+  _duerSavedFooter = document.getElementById('fp-foot').innerHTML;
+  document.getElementById('fp-foot').innerHTML = footerHTML;
+  document.getElementById('form-panel').classList.add('open');
+}
+
+function duerClosePanel() {
+  if (_duerSavedFooter !== null) {
+    document.getElementById('fp-foot').innerHTML = _duerSavedFooter;
+    _duerSavedFooter = null;
+  }
+  if (typeof closePanel === 'function') {
+    closePanel();
+  } else {
+    document.getElementById('form-panel').classList.remove('open');
+  }
+}
+
 // ── HELPERS API ──────────────────────────────────────────
 function getDuerClientId(name) {
   // Cherche l'UUID du client par son nom dans les données existantes
@@ -96,6 +121,11 @@ function duerScoreBadge(s) { return s>=6?'b-red':s>=3?'b-amber':'b-green'; }
 function duerScoreLabel(s) { return s>=6?'Critique':s>=3?'Modéré':'Faible'; }
 function duerStatusBadge(st) {
   return {Ouverte:'b-amber','En cours':'b-teal',Clôturée:'b-green'}[st]||'b-gray';
+}
+function duerDateInputValue(value) {
+  if (!value) return '';
+  if (typeof value === 'string') return value.split('T')[0];
+  return new Date(value).toISOString().split('T')[0];
 }
 function duerAllRisks(c) { return Object.values(DB[c]?.units||{}).flat(); }
 function duerCritiques(c) { return duerAllRisks(c).filter(r=>duerScore(r)>=6).length; }
@@ -277,13 +307,13 @@ function duerSelectUnit(c, u) { CUR.client=c; CUR.unit=u; duerRenderDetail(); }
 // ── FORMULAIRE RISQUE ────────────────────────────────────
 function duerOpenAddRisk() {
   EDIT_RISK = null;
-  document.getElementById('fp-title').textContent = 'Nouveau risque';
-  document.getElementById('fp-sub').textContent = `${CUR.client} — ${CUR.unit}`;
-  document.getElementById('fp-body').innerHTML = duerBuildForm({});
-  document.getElementById('fp-foot').innerHTML = `
-    <button class="btn btn-ghost" onclick="closePanel()">Annuler</button>
-    <button class="btn btn-teal" onclick="duerSaveRisk()">Enregistrer</button>`;
-  document.getElementById('form-panel').classList.add('open');
+  duerOpenPanel(
+    'Nouveau risque',
+    `${CUR.client} — ${CUR.unit}`,
+    duerBuildForm({}),
+    `<button class="btn btn-ghost" onclick="duerClosePanel()">Annuler</button>
+     <button class="btn btn-teal" onclick="duerSaveRisk()">Enregistrer</button>`
+  );
   duerUpdateScore();
 }
 
@@ -291,13 +321,13 @@ function duerEditRisk(id) {
   const r = (DB[CUR.client]?.units?.[CUR.unit]||[]).find(x=>x.id===id);
   if (!r) return;
   EDIT_RISK = id;
-  document.getElementById('fp-title').textContent = 'Modifier le risque';
-  document.getElementById('fp-sub').textContent = `${CUR.client} — ${CUR.unit}`;
-  document.getElementById('fp-body').innerHTML = duerBuildForm(r);
-  document.getElementById('fp-foot').innerHTML = `
-    <button class="btn btn-ghost" onclick="closePanel()">Annuler</button>
-    <button class="btn btn-teal" onclick="duerSaveRisk()">Enregistrer</button>`;
-  document.getElementById('form-panel').classList.add('open');
+  duerOpenPanel(
+    'Modifier le risque',
+    `${CUR.client} — ${CUR.unit}`,
+    duerBuildForm(r),
+    `<button class="btn btn-ghost" onclick="duerClosePanel()">Annuler</button>
+     <button class="btn btn-teal" onclick="duerSaveRisk()">Enregistrer</button>`
+  );
   duerUpdateScore();
 }
 
@@ -364,7 +394,7 @@ function duerBuildForm(r) {
     </div>
     <div class="fg">
       <label>Échéance</label>
-      <input type="date" id="f-echeance" value="${r.echeance||''}">
+      <input type="date" id="f-echeance" value="${duerDateInputValue(r.echeance)}">
     </div>
     <div class="fg full">
       <label>Statut de l'action</label>
@@ -431,7 +461,7 @@ async function duerSaveRisk() {
     });
     const { success, error } = await res.json();
     if (!success) throw new Error(error);
-    closePanel();
+    duerClosePanel();
     await loadDuerClient(CUR.client);
     duerRenderDetail();
   } catch (err) { alert('Erreur : ' + err.message); }
@@ -470,10 +500,10 @@ function duerOpenPlan(id) {
   const r = (DB[CUR.client]?.units?.[CUR.unit]||[]).find(x=>x.id===id);
   if (!r) return;
   const s = duerScore(r);
-  document.getElementById('fp-title').textContent = 'Plan d\'action';
-  document.getElementById('fp-sub').textContent = r.danger;
-  document.getElementById('fp-body').innerHTML = `
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:14px;background:var(--bg);border-radius:var(--r);border:1px solid var(--border);">
+  duerOpenPanel(
+    'Plan d\'action',
+    r.danger,
+    `<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:14px;background:var(--bg);border-radius:var(--r);border:1px solid var(--border);">
       <span class="score-circ ${duerScoreClass(s)}" style="width:40px;height:40px;font-size:16px;">${s}</span>
       <div>
         <div style="font-size:13px;font-weight:700;color:var(--navy);">${r.danger}</div>
@@ -487,18 +517,17 @@ function duerOpenPlan(id) {
       <div class="fg"><label>Responsable</label>
         <input id="pa-resp" value="${r.responsable||r.resp||''}"></div>
       <div class="fg"><label>Échéance</label>
-        <input type="date" id="pa-echeance" value="${r.echeance||''}"></div>
+        <input type="date" id="pa-echeance" value="${duerDateInputValue(r.echeance)}"></div>
       <div class="fg full"><label>Statut</label>
         <select id="pa-statut">
           <option${r.statut==='Ouverte'?' selected':''}>Ouverte</option>
           <option${r.statut==='En cours'?' selected':''}>En cours</option>
           <option${r.statut==='Clôturée'?' selected':''}>Clôturée</option>
         </select></div>
-    </div>`;
-  document.getElementById('fp-foot').innerHTML = `
-    <button class="btn btn-ghost" onclick="closePanel()">Annuler</button>
-    <button class="btn btn-teal" onclick="duerSavePlan('${id}')">Enregistrer</button>`;
-  document.getElementById('form-panel').classList.add('open');
+    </div>`,
+    `<button class="btn btn-ghost" onclick="duerClosePanel()">Annuler</button>
+     <button class="btn btn-teal" onclick="duerSavePlan('${id}')">Enregistrer</button>`
+  );
 }
 
 async function duerSavePlan(id) {
@@ -509,12 +538,14 @@ async function duerSavePlan(id) {
     statut:      document.getElementById('pa-statut')?.value,
   };
   try {
-    await fetch(`/api/v1/duer/risques/${id}`, {
+    const res = await fetch(`/api/v1/duer/risques/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
       body: JSON.stringify(payload)
     });
-    closePanel();
+    const { success, error } = await res.json();
+    if (!success) throw new Error(error);
+    duerClosePanel();
     await loadDuerClient(CUR.client);
     duerRenderDetail();
   } catch (err) { alert('Erreur : ' + err.message); }
