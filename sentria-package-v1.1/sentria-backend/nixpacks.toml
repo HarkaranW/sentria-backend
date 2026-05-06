@@ -1,5 +1,5 @@
 [phases.setup]
-aptPkgs = ["libreoffice", "fonts-montserrat"]
+aptPkgs = ["libreoffice", "fonts-recommended", "libfontconfig1"]
 
 [start]
 cmd = "npm start"
