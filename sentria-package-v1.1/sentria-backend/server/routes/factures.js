@@ -1,6 +1,8 @@
 // server/routes/factures.js
 const express = require('express');
 const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const authMiddleware = require('../middleware/auth');
 const { requireRole } = require('../middleware/roles');
 const pool = require('../db/pool');
@@ -105,12 +107,19 @@ router.get('/:id/export/pdf', async (req, res) => {
       } catch (e) { console.warn('Logo fetch failed'); }
     }
     const buffer = await genFactureDocx({ medecin: profil, facture });
-    const tmpPath = `/tmp/fact_${facture.id}.docx`;
+    const tmpDir = os.tmpdir();
+    const tmpPath = path.join(tmpDir, `fact_${facture.id}.docx`);
     fs.writeFileSync(tmpPath, buffer);
-    const pdfPath = await convertToPdf(tmpPath, '/tmp');
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="facture_${facture.numero}.pdf"`);
-    res.sendFile(pdfPath, () => { fs.unlinkSync(tmpPath); fs.unlinkSync(pdfPath); });
+    const result = await convertToPdf(tmpPath, tmpDir);
+    const isPdf = result.type === 'pdf';
+    const ext = isPdf ? 'pdf' : 'docx';
+    const mime = isPdf ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    res.setHeader('Content-Type', mime);
+    res.setHeader('Content-Disposition', `attachment; filename="facture_${facture.numero}.${ext}"`);
+    res.sendFile(result.path, () => {
+      if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
+      if (isPdf && fs.existsSync(result.path)) fs.unlinkSync(result.path);
+    });
   } catch (err) { res.status(500).json({ success: false, error: err.message }); }
 });
 

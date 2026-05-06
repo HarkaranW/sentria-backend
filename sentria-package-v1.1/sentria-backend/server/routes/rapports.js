@@ -1,6 +1,8 @@
 // server/routes/rapports.js
 const express = require('express');
 const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const authMiddleware = require('../middleware/auth');
 const pool = require('../db/pool');
 const { genRapportDocx } = require('../services/rapportService');
@@ -66,13 +68,20 @@ router.get('/export/pdf', async (req, res) => {
     const data = await getRapportData(client_id, month, year);
     const profil = req.user.profil || {};
     const buffer = await genRapportDocx({ ...data, medecin: profil, type });
-    const tmpPath = `/tmp/rapport_${Date.now()}.docx`;
+    const tmpDir = os.tmpdir();
+    const tmpPath = path.join(tmpDir, `rapport_${Date.now()}.docx`);
     fs.writeFileSync(tmpPath, buffer);
-    const pdfPath = await convertToPdf(tmpPath, '/tmp');
-    const fn = `rapport_${type}_${data.client.name}_${year}.pdf`.replace(/ /g, '_');
-    res.setHeader('Content-Type', 'application/pdf');
+    const result = await convertToPdf(tmpPath, tmpDir);
+    const isPdf = result.type === 'pdf';
+    const ext = isPdf ? 'pdf' : 'docx';
+    const mime = isPdf ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    const fn = `rapport_${type}_${data.client.name}_${year}.${ext}`.replace(/ /g, '_');
+    res.setHeader('Content-Type', mime);
     res.setHeader('Content-Disposition', `attachment; filename="${fn}"`);
-    res.sendFile(pdfPath, () => { fs.unlinkSync(tmpPath); fs.unlinkSync(pdfPath); });
+    res.sendFile(result.path, () => {
+      if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
+      if (isPdf && fs.existsSync(result.path)) fs.unlinkSync(result.path);
+    });
   } catch (err) { res.status(500).json({ success: false, error: err.message }); }
 });
 
@@ -96,12 +105,19 @@ router.get('/facturation/export/pdf', async (req, res) => {
       : { name: 'Tous les clients' };
     const profil = req.user.profil || {};
     const buffer = await genRapportFacturationDocx({ factures, client: clientInfo, medecin: profil, month, year });
-    const tmpPath = `/tmp/rapport_fact_${Date.now()}.docx`;
+    const tmpDir = os.tmpdir();
+    const tmpPath = path.join(tmpDir, `rapport_fact_${Date.now()}.docx`);
     fs.writeFileSync(tmpPath, buffer);
-    const pdfPath = await convertToPdf(tmpPath, '/tmp');
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="rapport_facturation_${year}.pdf"`);
-    res.sendFile(pdfPath, () => { fs.unlinkSync(tmpPath); fs.unlinkSync(pdfPath); });
+    const result = await convertToPdf(tmpPath, tmpDir);
+    const isPdf = result.type === 'pdf';
+    const ext = isPdf ? 'pdf' : 'docx';
+    const mime = isPdf ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    res.setHeader('Content-Type', mime);
+    res.setHeader('Content-Disposition', `attachment; filename="rapport_facturation_${year}.${ext}"`);
+    res.sendFile(result.path, () => {
+      if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
+      if (isPdf && fs.existsSync(result.path)) fs.unlinkSync(result.path);
+    });
   } catch (err) { res.status(500).json({ success: false, error: err.message }); }
 });
 

@@ -2,28 +2,59 @@
 const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
-/**
- * Convert a Word .docx file to PDF using LibreOffice (headless).
- * LibreOffice must be installed: sudo apt-get install -y libreoffice
- * @param {string} docxPath - absolute path to .docx file
- * @param {string} outputDir - directory for output PDF
- * @returns {Promise<string>} - absolute path to generated PDF
- */
-function convertToPdf(docxPath, outputDir = '/tmp') {
-  return new Promise((resolve, reject) => {
-    const cmd = `libreoffice --headless --convert-to pdf "${docxPath}" --outdir "${outputDir}"`;
-    exec(cmd, { timeout: 30000 }, (err, stdout, stderr) => {
+let _loCmd = null; // resolved command, or false if unavailable
+
+// Try candidate commands in order; resolve with the first that works.
+function resolveLibreOfficeCmd() {
+  if (_loCmd !== null) return Promise.resolve(_loCmd);
+
+  const candidates = ['libreoffice', 'soffice'];
+  if (os.platform() === 'win32') {
+    candidates.push(
+      'C:\\Program Files\\LibreOffice\\program\\soffice.exe',
+      'C:\\Program Files (x86)\\LibreOffice\\program\\soffice.exe'
+    );
+  }
+
+  return new Promise(resolve => {
+    let i = 0;
+    function tryNext() {
+      if (i >= candidates.length) {
+        _loCmd = false;
+        console.warn('LibreOffice not found — install it to enable PDF export');
+        return resolve(false);
+      }
+      const cmd = candidates[i++];
+      exec(`"${cmd}" --version`, { timeout: 5000 }, (err) => {
+        if (!err) { _loCmd = cmd; return resolve(cmd); }
+        tryNext();
+      });
+    }
+    tryNext();
+  });
+}
+
+// Returns { path, type } where type is 'pdf' or 'docx'.
+async function convertToPdf(docxPath, outputDir = os.tmpdir()) {
+  const cmd = await resolveLibreOfficeCmd();
+  if (!cmd) {
+    return { path: docxPath, type: 'docx' };
+  }
+  return new Promise((resolve) => {
+    const command = `"${cmd}" --headless --convert-to pdf "${docxPath}" --outdir "${outputDir}"`;
+    exec(command, { timeout: 30000 }, (err, stdout, stderr) => {
       if (err) {
-        console.error('LibreOffice error:', stderr);
-        return reject(new Error('PDF conversion failed: ' + err.message));
+        console.error('LibreOffice conversion error:', stderr);
+        return resolve({ path: docxPath, type: 'docx' });
       }
       const basename = path.basename(docxPath, '.docx');
       const pdfPath = path.join(outputDir, `${basename}.pdf`);
       if (!fs.existsSync(pdfPath)) {
-        return reject(new Error('PDF file not found after conversion'));
+        return resolve({ path: docxPath, type: 'docx' });
       }
-      resolve(pdfPath);
+      resolve({ path: pdfPath, type: 'pdf' });
     });
   });
 }

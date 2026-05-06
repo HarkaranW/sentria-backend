@@ -42,6 +42,7 @@ app.use('/api/v1/factures',     require('./routes/factures'));
 app.use('/api/v1/users',        require('./routes/users'));
 app.use('/api/v1/form-fields',  require('./routes/form-fields'));
 app.use('/api/v1/rapports',     require('./routes/rapports'));
+app.use('/api/v1/duer',         require('./routes/duer'));
 
 // ── HEALTH CHECK ──────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
@@ -59,7 +60,7 @@ app.get('*', (req, res) => {
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ success: false, error: 'Route API introuvable' });
   }
-  res.sendFile(path.join(__dirname, '../client/cabinet_sst_v11.html'));
+  res.sendFile(path.join(__dirname, '../client/cabinet_sst_v12.html'));
 });
 
 // ── ERROR HANDLER ─────────────────────────────────────────────────

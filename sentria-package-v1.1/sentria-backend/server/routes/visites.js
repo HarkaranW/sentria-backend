@@ -2,6 +2,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const authMiddleware = require('../middleware/auth');
 const makeCrudRouter = require('./_crud');
 const pool = require('../db/pool');
@@ -63,15 +64,19 @@ router.get('/:id/certificat/pdf', async (req, res) => {
       } catch (e) { console.warn('Logo fetch failed:', e.message); }
     }
     const buffer = await genCertificatDocx({ medecin: profil, visite: { ...visite, client: visite.client } });
-    const tmpPath = `/tmp/cert_${req.params.id}.docx`;
+    const tmpDir = os.tmpdir();
+    const tmpPath = path.join(tmpDir, `cert_${req.params.id}.docx`);
     fs.writeFileSync(tmpPath, buffer);
-    const pdfPath = await convertToPdf(tmpPath, '/tmp');
-    const filename = `certificat_${visite.nom}_${visite.prenom}.pdf`.replace(/ /g, '_');
-    res.setHeader('Content-Type', 'application/pdf');
+    const result = await convertToPdf(tmpPath, tmpDir);
+    const isPdf = result.type === 'pdf';
+    const ext = isPdf ? 'pdf' : 'docx';
+    const mime = isPdf ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    const filename = `certificat_${visite.nom}_${visite.prenom}.${ext}`.replace(/ /g, '_');
+    res.setHeader('Content-Type', mime);
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.sendFile(pdfPath, () => {
-      fs.unlinkSync(tmpPath);
-      fs.unlinkSync(pdfPath);
+    res.sendFile(result.path, () => {
+      if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
+      if (isPdf && fs.existsSync(result.path)) fs.unlinkSync(result.path);
     });
   } catch (err) {
     console.error(err);

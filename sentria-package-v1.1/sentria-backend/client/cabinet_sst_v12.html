@@ -336,6 +336,22 @@ html,body{height:100%;font-family:'Montserrat',sans-serif;background:#f0f2f5;ove
 .age-calc-disp{padding:10px 12px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;color:var(--navy);min-height:40px;}
 
 .ligne-inp{width:100%;padding:7px 9px;border:1.5px solid var(--border);border-radius:7px;font-size:11px;font-family:inherit;background:var(--card);color:var(--text);}
+/* DUER */
+.score-circ{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;}
+.score-green{background:#e8f5f0;color:#1a6e3c;}
+.score-amber{background:#fef3e2;color:#d4850a;}
+.score-red{background:#fde8e6;color:#c0392b;}
+.prog-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:3px;transition:width .3s;}
+.risk-hdr{display:flex;align-items:center;gap:12px;padding:14px 16px;}
+.risk-hdr-title{font-size:13px;font-weight:700;color:var(--navy);}
+.risk-hdr-meta{font-size:11px;color:var(--text2);}
+.risk-detail{padding:16px;}
+.action-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:8px;}
+.action-num{font-size:10px;font-weight:700;color:var(--text3);}
+.act-progress{background:var(--teal3);color:var(--teal);}
+.act-open{background:var(--amber3);color:var(--amber);}
+.act-done{background:var(--green3);color:var(--green);}
 </style>
 </head>
 <body>
@@ -409,6 +425,7 @@ html,body{height:100%;font-family:'Montserrat',sans-serif;background:#f0f2f5;ove
         <div class="sb-sep"></div>
         <div class="sb-sect"><div class="sb-lbl">Gestion</div>
           <button class="ni" onclick="goTo('salaries',this)" title="Salariés"><span class="ni-ico">👤</span><span class="ni-lbl">Salariés</span></button>
+          <button class="ni" onclick="goTo('duer',this)" title="DUER"><span class="ni-ico">⬡</span><span class="ni-lbl">DUER</span></button>
           <button class="ni perm-rapport" onclick="goTo('rapports',this)" title="Rapports"><span class="ni-ico">▤</span><span class="ni-lbl">Rapports</span></button>
           <button class="ni perm-rapport" onclick="goTo('facturation',this)" title="Facturation"><span class="ni-ico">◑</span><span class="ni-lbl">Facturation</span></button>
           <button class="ni" onclick="goTo('clients',this)" title="Clients"><span class="ni-ico">◫</span><span class="ni-lbl">Clients</span></button>
@@ -537,6 +554,11 @@ html,body{height:100%;font-family:'Montserrat',sans-serif;background:#f0f2f5;ove
             </div>
           </div>
           <div id="detail-content"></div>
+        </div>
+
+        <!-- DUER -->
+        <div class="page" id="duer">
+          <div id="duer-main-content"></div>
         </div>
 
         <!-- RAPPORTS -->
@@ -742,9 +764,11 @@ async function api(method,path,body){
 async function downloadBlob(path,filename){
   const res=await fetch('/api/v1'+path,{headers:{'Authorization':'Bearer '+getToken()}});
   if(!res.ok){const j=await res.json().catch(()=>({}));toast('⚠ '+(j.error||'Erreur export'),'var(--red)');return;}
+  const ct=res.headers.get('Content-Type')||'';
+  const fname=(ct.includes('wordprocessingml')&&filename.endsWith('.pdf'))?filename.replace(/\.pdf$/,'.docx'):filename;
   const blob=await res.blob();
   const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=filename;
+  const a=document.createElement('a');a.href=url;a.download=fname;
   document.body.appendChild(a);a.click();
   setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},1000);
 }
@@ -1097,7 +1121,7 @@ function goTo(id,btn){
   document.querySelectorAll('.ni').forEach(b=>b.classList.remove('active'));
   const pg=document.getElementById(id);if(pg)pg.classList.add('active');if(btn)btn.classList.add('active');
   closePanel();
-  ({dashboard:renderDashboard,consultations:renderConsultations,visites:renderVisites,accidents:renderAccidents,rapports:renderRapportPage,facturation:renderFactures,clients:renderClients,editeur:()=>showFE('consultation'),utilisateurs:renderUtilisateurs,profil:loadProfil,dossier:()=>{},salaries:renderSalaries,'fiche-sal':()=>{},'detail-acte':()=>{}})[id]?.();
+  ({dashboard:renderDashboard,consultations:renderConsultations,visites:renderVisites,accidents:renderAccidents,rapports:renderRapportPage,facturation:renderFactures,clients:renderClients,editeur:()=>showFE('consultation'),utilisateurs:renderUtilisateurs,profil:loadProfil,dossier:()=>{},salaries:renderSalaries,'fiche-sal':()=>{},'detail-acte':()=>{},duer:renderDUER})[id]?.();
 }
 
 // ══ RENDERS ══
@@ -1406,7 +1430,7 @@ async function addFEField(type){
 const FORMS_DEF={
   consultation:{title:'Nouvelle consultation',sub:'Formulaire 1 — Consultation médicale',steps:[
     {name:'Contexte',fields:[{k:'client',l:'Entreprise *',t:'select',opts:()=>S.clients,req:true},{k:'date',l:'Date *',t:'date',req:true}]},
-    {name:'Salarié',fields:[{k:'_salSearch',l:'',t:'salSearch',full:true},{k:'nom',l:'Nom *',t:'text',req:true},{k:'prenom',l:'Prénom *',t:'text',req:true},{k:'service',l:'Service *',t:'text',req:true},{k:'sexe',l:'Sexe',t:'select',opts:()=>['Homme','Femme']},{k:'dateNaissance',l:'Date de naissance',t:'date'},{k:'antMed',l:'Antécédents médicaux',t:'textarea',full:true},{k:'antChir',l:'Antécédents chirurgicaux',t:'text',full:true}]},
+    {name:'Salarié',fields:[{k:'_salSearch',l:'',t:'salSearch',full:true},{k:'nom',l:'Nom *',t:'text',req:true},{k:'prenom',l:'Prénom *',t:'text',req:true},{k:'service',l:'Service *',t:'text',req:true},{k:'sexe',l:'Sexe',t:'select',opts:()=>['Homme','Femme']},{k:'dateNaissance',l:'Date de naissance',t:'date'},{k:'_ageCalc',l:'Âge calculé',t:'ageCalc'},{k:'antMed',l:'Antécédents médicaux',t:'textarea',full:true},{k:'antChir',l:'Antécédents chirurgicaux',t:'text',full:true}]},
     {name:'Examen',fields:[{k:'tension',l:'Tension (mmHg)',t:'text',ph:'120/80'},{k:'temperature',l:'Température (°C)',t:'text',ph:'37.5'},{k:'poids',l:'Poids (kg)',t:'text'},{k:'imc',l:'IMC',t:'text'},{sep:'Examen clinique'},{k:'motif',l:'Motif *',t:'textarea',req:true,full:true},{k:'interrogatoire',l:'Interrogatoire',t:'audioTextarea',full:true},{k:'signesCliniques',l:'Signes cliniques',t:'textarea',full:true},{k:'hypothese',l:'Hypothèse diagnostique',t:'textarea',full:true},{k:'examens',l:'Examens complémentaires',t:'text',full:true}]},
     {name:'Diagnostic',fields:[{k:'diagnostic',l:'Pathologie(s) *',t:'select',opts:()=>PATHOLOGIES,req:true},{k:'diagnosticAutre',l:'Si Autre, préciser',t:'text'},{sep:'Prise en charge'},{k:'traitement',l:'Traitement prescrit',t:'textarea',full:true,ph:'Ex : Coartem 4cp × 2/j pendant 3j…'},{k:'medicaments',l:'Médicaments délivrés',t:'text',full:true},{k:'orientation',l:'Orientation',t:'select',opts:()=>ORIENTATIONS},{sep:'Certificat médical'},{k:'arret',l:"Arrêt de travail délivré ?",t:'select',opts:()=>['Non','Oui']},{k:'dureeArret',l:"Durée d'arrêt (jours)",t:'text',ph:'Ex : 3'},{k:'observations',l:'Observations',t:'textarea',full:true}]}
   ]},
@@ -2471,5 +2495,6 @@ async function saveForm(){
   }catch(e){/* token invalid — stay on login screen */}
 })();
 </script>
+<script src="duer_module.js"></script>
 </body>
 </html>
