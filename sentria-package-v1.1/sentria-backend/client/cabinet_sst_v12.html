@@ -1263,12 +1263,59 @@ async function exporterFacturePDF(id){
   const f=S.factures.find(x=>x.id===id);if(!f)return;
   await downloadBlob(`/factures/${id}/export/pdf`,`facture_${f.numero}.pdf`);
 }
+function factureEmailBody(f){
+  const p=getProfil();
+  return `Madame, Monsieur,
+
+Veuillez trouver ci-joint la facture ${f.numero} d'un montant de ${fmtM(f.montantTotal)} pour les services de médecine du travail rendus pour la période ${f.description||''}.
+
+Pour tout règlement par virement bancaire :
+Banque : ${p.banque||'—'}
+Titulaire : ${p.titulaire||'Dr Latoundji'}
+N° de compte : ${p.compte||'—'}
+
+Cordialement,
+${`Dr ${p.prenom||''} ${p.nom||'Latoundji'}`.trim()}
+Cabinet SST — Médecine du Travail
+${p.tel1||''}
+${p.email||''}`;
+}
+function emailDraftHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function preparerEmail(id){
   const f=S.factures.find(x=>x.id===id);if(!f)return;
-  const p=getProfil();
-  const corps=`Madame, Monsieur,\n\nVeuillez trouver ci-joint la facture ${f.numero} d'un montant de ${fmtM(f.montantTotal)} pour les services de médecine du travail rendus pour la période ${f.description||''}.\n\nPour tout règlement par virement bancaire :\nBanque : ${p.banque||'—'}\nTitulaire : ${p.titulaire||'Dr Latoundji'}\nN° de compte : ${p.compte||'—'}\n\nCordialement,\n${`Dr ${p.prenom||''} ${p.nom||'Latoundji'}`.trim()}\nCabinet SST — Médecine du Travail\n${p.tel1||''}\n${p.email||''}`;
-  const mailto=`mailto:?subject=Facture ${f.numero} — Cabinet SST Dr Latoundji&body=${encodeURIComponent(corps)}`;
-  window.location.href=mailto;
+  const old=document.getElementById('fact-email-box');if(old)old.remove();
+  const html=`
+    <div id="fact-email-box" class="action-card" style="margin:0 28px 20px;">
+      <div class="fgrid" style="margin:0;">
+        <div class="fg full"><label>Email destinataire</label><input id="fact-email-to" type="email" placeholder="client@example.com"></div>
+        <div class="fg full"><label>Message préparé</label><textarea id="fact-email-body" style="min-height:180px;">${emailDraftHtml(factureEmailBody(f))}</textarea></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm" onclick="ouvrirMailFacture('${id}')">Ouvrir dans l'app mail</button>
+        <button class="btn btn-teal btn-sm" onclick="envoyerFactureEmail('${id}')">Envoyer</button>
+      </div>
+    </div>`;
+  document.querySelector('#fact-preview-zone .fact-preview')?.insertAdjacentHTML('beforeend',html);
+  document.getElementById('fact-email-to')?.focus();
+}
+function ouvrirMailFacture(id){
+  const f=S.factures.find(x=>x.id===id);if(!f)return;
+  const to=document.getElementById('fact-email-to')?.value?.trim()||'';
+  const body=document.getElementById('fact-email-body')?.value||factureEmailBody(f);
+  const subject=`Facture ${f.numero} — Cabinet SST Dr Latoundji`;
+  window.location.href=`mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+async function envoyerFactureEmail(id){
+  const to=document.getElementById('fact-email-to')?.value?.trim();
+  if(!to){toast('⚠ Email destinataire requis','var(--amber)');return;}
+  const message=document.getElementById('fact-email-body')?.value||'';
+  try{
+    const sent=await api('POST',`/factures/${id}/send-email`,{to_email:to,message});
+    const f=S.factures.find(x=>x.id===id);
+    if(f)f.statut='Envoyée';
+    renderFactures();
+    toast(sent?.id?`✓ Email accepté (${sent.id})`:'✓ Email envoyé');
+  }catch(e){toast('⚠ '+e.message,'var(--red)');}
 }
 
 function renderClients(){

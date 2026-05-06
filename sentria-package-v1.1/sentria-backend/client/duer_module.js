@@ -380,6 +380,20 @@ function duerBuildForm(r) {
       <div id="score-display" style="padding:10px 14px;border-radius:8px;font-size:14px;font-weight:700;background:var(--bg);border:1.5px solid var(--border);">—</div>
     </div>
     <div class="fg full">
+      <label>Mesures existantes</label>
+      <textarea id="f-mesures" placeholder="Ex : EPI, consignes, formation existante">${r.mesures||''}</textarea>
+    </div>
+    <div class="fg">
+      <label>Salariés exposés</label>
+      <input type="number" id="f-exposes" min="0" value="${r.exposes??''}" placeholder="Ex : 12">
+    </div>
+    <div class="fg">
+      <label>Fréquence d'exposition</label>
+      <select id="f-frequence">
+        ${['','Occasionnelle','Régulière','Quotidienne','Permanente'].map(f=>`<option value="${f}"${(r.frequence||'')===f?' selected':''}>${f||'—'}</option>`).join('')}
+      </select>
+    </div>
+    <div class="fg full">
       <label>Référence réglementaire (optionnel)</label>
       <input id="f-ref" value="${r.ref_regl||r.ref||''}" placeholder="Ex : Art. 182 Code du Travail togolais">
     </div>
@@ -445,6 +459,9 @@ async function duerSaveRisk() {
     famille:     document.getElementById('f-family')?.value || '',
     probabilite: parseInt(document.getElementById('f-p')?.value) || 1,
     gravite:     parseInt(document.getElementById('f-g')?.value) || 1,
+    mesures:     document.getElementById('f-mesures')?.value || '',
+    exposes:     document.getElementById('f-exposes')?.value ? parseInt(document.getElementById('f-exposes').value) : null,
+    frequence:   document.getElementById('f-frequence')?.value || '',
     ref_regl:    document.getElementById('f-ref')?.value || '',
     action:      document.getElementById('f-action')?.value || '',
     responsable: document.getElementById('f-resp')?.value || '',

@@ -131,12 +131,20 @@ router.post('/:id/send-email', async (req, res) => {
        LEFT JOIN clients c ON f.client_id = c.id WHERE f.id = $1`, [req.params.id]
     );
     if (!facture) return res.status(404).json({ success: false, error: 'Facture introuvable' });
-    const { to_email } = req.body;
+    const { to_email, message } = req.body;
     if (!to_email) return res.status(400).json({ success: false, error: 'Email destinataire requis' });
-    await sendInvoiceEmail({ to: to_email, facture, medecin: req.user.profil || {} });
+    const sent = await sendInvoiceEmail({ to: to_email, facture, medecin: req.user.profil || {}, message });
+    console.log('Invoice email accepted by Resend:', {
+      facture_id: req.params.id,
+      resend_id: sent?.id || null,
+      to_email,
+    });
     await pool.query(`UPDATE factures SET statut='Envoyée', updated_at=NOW() WHERE id=$1`, [req.params.id]);
-    res.json({ success: true, data: { sent: true } });
-  } catch (err) { res.status(500).json({ success: false, error: err.message }); }
+    res.json({ success: true, data: { sent: true, id: sent?.id || null } });
+  } catch (err) {
+    console.error('Invoice email failed:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 module.exports = router;

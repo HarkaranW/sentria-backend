@@ -17,22 +17,32 @@ router.patch('/risques/:id', async (req, res) => {
     if (!existing.length) return res.status(404).json({ success: false, error: 'Risque introuvable' });
     if (!canModify(existing[0], req.user))
       return res.status(403).json({ success: false, error: 'Délai de modification dépassé (30 jours) ou accès refusé' });
-    const { danger, famille, probabilite, gravite, ref_regl, action, responsable, echeance, statut } = req.body;
+    const {
+      danger, famille, probabilite, gravite, mesures, exposes, frequence,
+      ref_regl, action, responsable, echeance, statut
+    } = req.body;
     const { rows } = await pool.query(
       `UPDATE duer_risques SET
         danger      = COALESCE($1,  danger),
         famille     = COALESCE($2,  famille),
         probabilite = COALESCE($3,  probabilite),
         gravite     = COALESCE($4,  gravite),
-        ref_regl    = COALESCE($5,  ref_regl),
-        action      = COALESCE($6,  action),
-        responsable = COALESCE($7,  responsable),
-        echeance    = COALESCE($8,  echeance),
-        statut      = COALESCE($9,  statut),
-        modified_by = $10,
+        mesures     = COALESCE($5,  mesures),
+        exposes     = COALESCE($6,  exposes),
+        frequence   = COALESCE($7,  frequence),
+        ref_regl    = COALESCE($8,  ref_regl),
+        action      = COALESCE($9,  action),
+        responsable = COALESCE($10, responsable),
+        echeance    = COALESCE($11, echeance),
+        statut      = COALESCE($12, statut),
+        modified_by = $13,
         modified_at = NOW()
-       WHERE id = $11 RETURNING *`,
-      [danger, famille, probabilite, gravite, ref_regl, action, responsable, echeance || null, statut, req.user.id, req.params.id]
+       WHERE id = $14 RETURNING *`,
+      [
+        danger, famille, probabilite, gravite, mesures || null,
+        exposes === '' ? null : exposes, frequence || null, ref_regl,
+        action, responsable, echeance || null, statut, req.user.id, req.params.id
+      ]
     );
     res.json({ success: true, data: rows[0] });
   } catch (err) {
@@ -81,7 +91,10 @@ router.get('/:client_id', async (req, res) => {
 router.post('/:client_id/risques', async (req, res) => {
   try {
     const { client_id } = req.params;
-    const { unite, danger, famille, probabilite, gravite, ref_regl, action, responsable, echeance, statut } = req.body;
+    const {
+      unite, danger, famille, probabilite, gravite, mesures, exposes, frequence,
+      ref_regl, action, responsable, echeance, statut
+    } = req.body;
     if (!danger || !unite) return res.status(400).json({ success: false, error: 'danger et unite requis' });
     await pool.query(
       'INSERT INTO duer_unites (client_id, nom) VALUES ($1, $2) ON CONFLICT (client_id, nom) DO NOTHING',
@@ -89,9 +102,10 @@ router.post('/:client_id/risques', async (req, res) => {
     );
     const { rows } = await pool.query(
       `INSERT INTO duer_risques
-         (client_id, unite, danger, famille, probabilite, gravite, ref_regl, action, responsable, echeance, statut, created_by)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,
+         (client_id, unite, danger, famille, probabilite, gravite, mesures, exposes, frequence, ref_regl, action, responsable, echeance, statut, created_by)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING *`,
       [client_id, unite, danger, famille || null, probabilite || 1, gravite || 1,
+       mesures || null, exposes === '' ? null : exposes, frequence || null,
        ref_regl || null, action || null, responsable || null, echeance || null,
        statut || 'Ouverte', req.user.id]
     );

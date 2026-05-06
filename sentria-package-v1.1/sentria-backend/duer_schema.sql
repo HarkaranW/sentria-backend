@@ -34,3 +34,8 @@ CREATE TABLE IF NOT EXISTS duer_risques (
 
 CREATE INDEX IF NOT EXISTS idx_duer_risques_client ON duer_risques(client_id);
 CREATE INDEX IF NOT EXISTS idx_duer_unites_client  ON duer_unites(client_id);
+
+-- Keep existing DUER tables aligned if this script is run after an earlier partial deploy.
+ALTER TABLE duer_risques ADD COLUMN IF NOT EXISTS mesures TEXT;
+ALTER TABLE duer_risques ADD COLUMN IF NOT EXISTS exposes INTEGER;
+ALTER TABLE duer_risques ADD COLUMN IF NOT EXISTS frequence VARCHAR(50);

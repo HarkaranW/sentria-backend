@@ -7,12 +7,23 @@ function fmtMoney(n) {
   return (parseInt(n) || 0).toLocaleString('fr-FR') + ' FCFA';
 }
 
+function escapeHtml(value) {
+  return String(value || '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[c]));
+}
+
 /**
  * Send invoice by email
  */
-async function sendInvoiceEmail({ to, facture, medecin }) {
+async function sendInvoiceEmail({ to, facture, medecin, message }) {
   const nomMed = `Dr ${medecin.prenom || ''} ${medecin.nom || 'Latoundji'}`.trim();
   const subject = `Facture ${facture.numero} — ${nomMed} — Cabinet SST`;
+  const bodyHtml = message ? escapeHtml(message).replace(/\n/g, '<br>') : null;
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
       <div style="background:#1a3a52;padding:20px 24px;border-radius:8px 8px 0 0;">
@@ -20,7 +31,7 @@ async function sendInvoiceEmail({ to, facture, medecin }) {
         <div style="color:rgba(255,255,255,.6);font-size:12px;">${medecin.titre || 'Médecin du Travail'}</div>
       </div>
       <div style="background:#fff;padding:28px 24px;border:1px solid #e2e8ed;border-top:none;border-radius:0 0 8px 8px;">
-        <p style="color:#333;font-size:14px;">Madame, Monsieur,</p>
+        ${bodyHtml ? `<div style="color:#333;font-size:14px;line-height:1.6;">${bodyHtml}</div>` : `<p style="color:#333;font-size:14px;">Madame, Monsieur,</p>
         <p style="color:#333;font-size:14px;line-height:1.6;">
           Veuillez trouver ci-joint la facture <strong>${facture.numero}</strong>
           d'un montant de <strong>${fmtMoney(facture.montant_total)}</strong>
@@ -31,23 +42,27 @@ async function sendInvoiceEmail({ to, facture, medecin }) {
           <div style="font-size:13px;color:#333;"><strong>Banque :</strong> ${medecin.banque || '—'}</div>
           <div style="font-size:13px;color:#333;"><strong>Titulaire :</strong> ${medecin.titulaire || nomMed}</div>
           <div style="font-size:13px;color:#333;"><strong>N° de compte :</strong> ${medecin.compte || '—'}</div>
-        </div>
+        </div>`}
         <p style="color:#333;font-size:14px;">Cordialement,</p>
         <p style="color:#1a3a52;font-size:14px;font-weight:700;">${nomMed}</p>
         <p style="color:#888;font-size:12px;">${medecin.tel1 || ''} · ${medecin.email || ''}</p>
       </div>
     </div>
   `;
-  await resend.emails.send({
+  const result = await resend.emails.send({
     from: `${process.env.FROM_NAME || 'Cabinet SST'} <${process.env.FROM_EMAIL || 'noreply@sentria.io'}>`,
     to,
     subject,
     html,
   });
+  if (result.error) {
+    throw new Error(result.error.message || 'Resend email send failed');
+  }
+  return result.data;
 }
 
 async function sendPasswordResetEmail({ to, resetUrl }) {
-  await resend.emails.send({
+  const result = await resend.emails.send({
     from: `${process.env.FROM_NAME || 'Cabinet SST'} <${process.env.FROM_EMAIL || 'noreply@sentria.io'}>`,
     to,
     subject: 'Réinitialisation de votre mot de passe — Cabinet SST',
@@ -74,6 +89,10 @@ async function sendPasswordResetEmail({ to, resetUrl }) {
       </div>
     `,
   });
+  if (result.error) {
+    throw new Error(result.error.message || 'Resend password reset email failed');
+  }
+  return result.data;
 }
 
 module.exports = { sendInvoiceEmail, sendPasswordResetEmail };
