@@ -10,7 +10,13 @@ let _loCmd = null; // resolved command, or false if unavailable
 function resolveLibreOfficeCmd() {
   if (_loCmd !== null) return Promise.resolve(_loCmd);
 
-  const candidates = ['libreoffice', 'soffice'];
+  const candidates = [
+    'libreoffice',
+    'soffice',
+    '/usr/bin/libreoffice',
+    '/usr/lib/libreoffice/program/soffice',
+    '/usr/local/bin/libreoffice',
+  ];
   if (os.platform() === 'win32') {
     candidates.push(
       'C:\\Program Files\\LibreOffice\\program\\soffice.exe',
