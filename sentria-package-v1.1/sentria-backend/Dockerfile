@@ -2,7 +2,6 @@ FROM node:20-slim
 
 RUN apt-get update && apt-get install -y \
     libreoffice \
-    fonts-montserrat \
     fonts-recommended \
     libfontconfig1 \
     --no-install-recommends \
