@@ -187,7 +187,7 @@ html,body{height:100%;font-family:'Montserrat',sans-serif;background:#f0f2f5;ove
 .fe-type-lbl{font-size:10px;font-weight:700;color:var(--text);}
 .fe-type-sub{font-size:9px;color:var(--text3);margin-top:2px;}
 .fe-form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
-.fe-inp{padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit;background:var(--card);color:var(--text);width:100%;}
+.fe-inp{padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit;background:var(--card);color:var(--text);transition:border-color .15s;width:100%;}
 .fe-inp:focus{outline:none;border-color:var(--navy);}
 .fe-key-preview{font-size:10px;color:var(--text3);margin-top:4px;}
 .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card);border:1.5px solid var(--border);border-radius:8px;}
@@ -201,7 +201,7 @@ html,body{height:100%;font-family:'Montserrat',sans-serif;background:#f0f2f5;ove
 .opts-editor{grid-column:1/-1;background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:12px;}
 .opts-editor-title{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;}
 .opt-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
-.opt-inp{flex:1;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:11px;font-family:inherit;background:var(--bg);color:var(--text);}
+.opt-inp{flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit;background:var(--card);color:var(--text);transition:border-color .15s;}
 .opt-inp:focus{outline:none;border-color:var(--navy);}
 .opt-del{background:none;border:none;cursor:pointer;color:var(--red);font-size:14px;flex-shrink:0;padding:2px 6px;}
 .opt-add{background:var(--navy3);border:1.5px solid var(--navy);border-radius:7px;padding:6px 14px;font-size:11px;font-weight:600;font-family:inherit;color:var(--navy);cursor:pointer;margin-top:4px;}
@@ -336,6 +336,15 @@ html,body{height:100%;font-family:'Montserrat',sans-serif;background:#f0f2f5;ove
 .age-calc-disp{padding:10px 12px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;color:var(--navy);min-height:40px;}
 
 .ligne-inp{width:100%;padding:7px 9px;border:1.5px solid var(--border);border-radius:7px;font-size:11px;font-family:inherit;background:var(--card);color:var(--text);}
+.btn-del{background:var(--red3);color:var(--red);border:1.5px solid #f5c6c0;padding:4px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;}
+.btn-del:hover{background:var(--red);color:#fff;}
+.fe-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+.detail-field input,.detail-field select,.detail-field textarea{width:100%;border:none;border-bottom:1.5px solid var(--border);background:transparent;font-size:13px;color:var(--text);font-weight:500;font-family:inherit;padding:2px 0;outline:none;line-height:1.5;}
+.detail-field input:focus,.detail-field select:focus,.detail-field textarea:focus{border-bottom-color:var(--navy);}
+.detail-field textarea{resize:vertical;min-height:60px;}
+.detail-field input,.detail-field select,.detail-field textarea{width:100%;border:none;border-bottom:1.5px solid var(--border);background:transparent;font-size:13px;color:var(--text);font-weight:500;font-family:inherit;padding:2px 0;outline:none;line-height:1.5;}
+.detail-field input:focus,.detail-field select:focus,.detail-field textarea:focus{border-bottom-color:var(--navy);}
+.detail-field textarea{resize:vertical;min-height:60px;}
 /* DUER */
 .score-circ{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;}
 .score-green{background:#e8f5f0;color:#1a6e3c;}
@@ -486,7 +495,7 @@ html,body{height:100%;font-family:'Montserrat',sans-serif;background:#f0f2f5;ove
           <div class="tcard"><div class="ttbar"><span class="ttbar-title">Toutes les consultations</span>
             <select id="fc-cl" onchange="renderConsultations()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:10px;font-family:inherit;background:var(--card);color:var(--text);"><option value="">Tous clients</option></select>
           </div>
-          <table class="tbl"><thead><tr><th>Date</th><th>Salarié</th><th>Client</th><th>Diagnostic</th><th>Orientation</th><th>Arrêt</th></tr></thead>
+          <table class="tbl"><thead><tr><th>Date</th><th>Salarié</th><th>Client</th><th>Diagnostic</th><th>Orientation</th><th>Arrêt</th><th>Actions</th></tr></thead>
           <tbody id="consult-tbody"></tbody></table></div>
         </div>
 
@@ -515,7 +524,7 @@ html,body{height:100%;font-family:'Montserrat',sans-serif;background:#f0f2f5;ove
           <div class="ph"><div class="ph-left"><h2>Accidents de travail</h2><p>Déclarations et suivi CNSS</p></div>
             <button class="btn btn-navy" onclick="openPanel('accident')">+ Déclarer un accident</button></div>
           <div class="tcard"><div class="ttbar"><span class="ttbar-title">Tous les accidents</span></div>
-          <table class="tbl"><thead><tr><th>Date</th><th>Salarié</th><th>Client</th><th>Nature lésions</th><th>Gravité</th><th>Arrêt</th><th>CNSS</th></tr></thead>
+          <table class="tbl"><thead><tr><th>Date</th><th>Salarié</th><th>Client</th><th>Nature lésions</th><th>Gravité</th><th>Arrêt</th><th>CNSS</th><th>Actions</th></tr></thead>
           <tbody id="acc-tbody"></tbody></table></div>
         </div>
 
@@ -549,8 +558,11 @@ html,body{height:100%;font-family:'Montserrat',sans-serif;background:#f0f2f5;ove
             <div class="ph-left"><h2 id="detail-title">Détail</h2><p id="detail-sub"></p></div>
             <div style="display:flex;gap:8px;">
               <button class="btn btn-ghost" id="detail-back-btn" onclick="retourFiche()">← Retour au dossier</button>
-              <button class="btn btn-teal btn-sm" id="detail-edit-btn" style="display:none;" onclick="modifierActe()">✎ Modifier</button>
+              <button class="btn btn-teal btn-sm" id="detail-edit-btn" style="display:none;" onclick="voirActeEditMode(CURRENT_DETAIL_ID,CURRENT_DETAIL_TYPE)">✎ Modifier</button>
               <button class="btn btn-teal btn-sm" id="detail-cert-btn" style="display:none;" onclick="genCertificatFromDetail()">Certificat</button>
+              <button class="btn btn-del btn-sm" id="detail-del-btn" style="display:none;" onclick="supprimerActeDetail()">✕ Supprimer</button>
+              <button class="btn btn-ghost btn-sm" id="detail-cancel-btn" style="display:none;" onclick="voirActe(CURRENT_DETAIL_ID,CURRENT_DETAIL_TYPE)">Annuler</button>
+              <button class="btn btn-teal btn-sm" id="detail-save-btn" style="display:none;" onclick="saveEditDetail(CURRENT_DETAIL_ID,CURRENT_DETAIL_TYPE)">Enregistrer</button>
             </div>
           </div>
           <div id="detail-content"></div>
@@ -789,6 +801,7 @@ let S={
     accident:['client','date','heure','nom','prenom','service','poste','lieu','description','tache','temoins','naturesLesion','localisations','gravite','soinsImmed','arret','dureeArret','orientation','declareCNSS','observations']
   },
   customFields:{consultation:[],visite:[],accident:[]},
+  formSections:{},
   salaries:[],
   tarifs:{'Consultation médicale':5000,"Visite d'embauche":10000,'Visite médicale périodique':7500,'Rapport mensuel':25000}
 };
@@ -815,7 +828,8 @@ function normConsultation(r){
     diagnosticAutre:r.diagnostic_autre,traitement:r.traitement,medicaments:r.medicaments,
     orientation:r.orientation,arret:r.arret,dureeArret:r.duree_arret,
     observations:r.observations,createdAt:r.created_at,createdBy:r.created_by,
-    saisiPar:r.saisi_par,_salId:r.salarie_id,_client_id:r.client_id};
+    saisiPar:r.saisi_par,_salId:r.salarie_id,_client_id:r.client_id,
+    ...(r.custom_fields||{})};
 }
 function normVisite(r){
   const{byId}=clientMap();
@@ -826,7 +840,8 @@ function normVisite(r){
     aptitude:r.aptitude,restrictions:r.restrictions,amenagement:r.amenagement,
     natureAmenagement:r.nature_amenagement,prochaineVisite:r.prochaine_visite,
     observations:r.observations,createdAt:r.created_at,createdBy:r.created_by,
-    saisiPar:r.saisi_par,_salId:r.salarie_id,_client_id:r.client_id};
+    saisiPar:r.saisi_par,_salId:r.salarie_id,_client_id:r.client_id,
+    ...(r.custom_fields||{})};
 }
 function normAccident(r){
   const{byId}=clientMap();
@@ -838,7 +853,8 @@ function normAccident(r){
     arret:r.arret,dureeArret:r.duree_arret,orientation:r.orientation,
     declareCNSS:r.declare_cnss,observations:r.observations,
     createdAt:r.created_at,createdBy:r.created_by,
-    saisiPar:r.saisi_par,_salId:r.salarie_id,_client_id:r.client_id};
+    saisiPar:r.saisi_par,_salId:r.salarie_id,_client_id:r.client_id,
+    ...(r.custom_fields||{})};
 }
 function normFacture(r){
   const{byId}=clientMap();
@@ -1144,7 +1160,7 @@ function renderConsultations(){
   const fc=document.getElementById('fc-cl');fc.innerHTML='<option value="">Tous clients</option>'+S.clients.map(c=>`<option value="${c}">${c}</option>`).join('');
   const cur=fc.value;const data=S.consultations.filter(x=>!cur||x.client===cur).sort((a,b)=>new Date(b.date)-new Date(a.date));
   const oB=o=>{if(!o||o==='Aucune')return'<span style="color:var(--text3)">—</span>';const c=o.includes('Urgences')?'b-red':o.includes('spécialiste')?'b-blue':'b-gray';return`<span class="badge ${c}">${o}</span>`;};
-  document.getElementById('consult-tbody').innerHTML=data.length?data.map(x=>`<tr><td><span class="dchip">${fmt(x.date)}</span></td><td style="font-weight:600;">${x.nom||''} ${x.prenom||''}</td><td>${x.client||''}</td><td>${x.diagnostic||'—'}</td><td>${oB(x.orientation)}</td><td>${x.arret==='Oui'?`<span class="badge b-red">${x.dureeArret||'?'}j</span>`:'—'}</td></tr>`).join(''):'<tr><td colspan="6" class="tbl-empty">Aucune consultation enregistrée.</td></tr>';
+  document.getElementById('consult-tbody').innerHTML=data.length?data.map(x=>{const c=canModify(x);return`<tr><td><span class="dchip">${fmt(x.date)}</span></td><td style="font-weight:600;">${x.nom||''} ${x.prenom||''}</td><td>${x.client||''}</td><td>${x.diagnostic||'—'}</td><td>${oB(x.orientation)}</td><td>${x.arret==='Oui'?`<span class="badge b-red">${x.dureeArret||'?'}j</span>`:'—'}</td><td><div style="display:flex;gap:4px;"><button class="btn btn-xs btn-out" onclick="voirActe('${x.id}','consultation')">Voir</button>${c?`<button class="btn btn-xs btn-out" onclick="voirActeEditMode('${x.id}','consultation')">✎</button>`:''}<button class="btn btn-xs btn-out" onclick="ouvrirDossier('${x.nom||''}','${x.prenom||''}')">Dossier</button>${c?`<button class="btn-del" onclick="supprimerActe('${x.id}','consultation')">✕</button>`:''}</div></td></tr>`}).join(''):'<tr><td colspan="7" class="tbl-empty">Aucune consultation enregistrée.</td></tr>';
 }
 function renderVisites(){
   const ft=document.getElementById('fv-type').value;const data=S.visites.filter(x=>!ft||x.typeVisite===ft).sort((a,b)=>new Date(b.date)-new Date(a.date));
@@ -1157,16 +1173,13 @@ function renderVisites(){
     <td style="color:var(--text2);">${x.service||'—'}</td>
     <td>${aptBadge(x.aptitude)}</td>
     <td>${x.prochaineVisite?`<span class="dchip">${fmt(x.prochaineVisite)}</span>`:'—'}</td>
-    <td><div style="display:flex;gap:4px;">
-      <button class="btn btn-xs btn-teal" onclick="genCertificat('${x.id}')" title="Générer le certificat d'aptitude">Certificat</button>
-      <button class="btn btn-xs btn-out" onclick="ouvrirDossier('${x.nom||''}','${x.prenom||''}')" title="Dossier salarié complet">Dossier</button>
-    </div></td>
+    <td><div style="display:flex;gap:4px;"><button class="btn btn-xs btn-out" onclick="voirActe('${x.id}','visite')">Voir</button>${canModify(x)?`<button class="btn btn-xs btn-out" onclick="voirActeEditMode('${x.id}','visite')">✎</button>`:''}<button class="btn btn-xs btn-teal" onclick="genCertificat('${x.id}')">Certificat</button><button class="btn btn-xs btn-out" onclick="ouvrirDossier('${x.nom||''}','${x.prenom||''}')">Dossier</button>${canModify(x)?`<button class="btn-del" onclick="supprimerActe('${x.id}','visite')">✕</button>`:''}</div></td>
   </tr>`).join(''):'<tr><td colspan="8" class="tbl-empty">Aucune visite enregistrée.</td></tr>';
 }
 function renderAccidents(){
   const data=[...S.accidents].sort((a,b)=>new Date(b.date)-new Date(a.date));
   const gB={Léger:'b-amber',Modéré:'b-blue',Grave:'b-red'};const cB={Oui:'b-green','En cours':'b-amber',Non:'b-red'};
-  document.getElementById('acc-tbody').innerHTML=data.length?data.map(x=>`<tr><td><span class="dchip">${fmt(x.date)}</span></td><td style="font-weight:600;">${x.nom||''} ${x.prenom||''}</td><td>${x.client||''}</td><td style="font-size:10px;">${(x.naturesLesion||[]).slice(0,2).join(', ')||'—'}</td><td><span class="badge ${gB[x.gravite]||'b-gray'}">${x.gravite||'—'}</span></td><td>${x.arret==='Oui'?`<span class="badge b-red">${x.dureeArret||'?'}j</span>`:'—'}</td><td><span class="badge ${cB[x.declareCNSS]||'b-gray'}">${x.declareCNSS||'Non'}</span></td></tr>`).join(''):'<tr><td colspan="7" class="tbl-empty">Aucun accident déclaré.</td></tr>';
+  document.getElementById('acc-tbody').innerHTML=data.length?data.map(x=>{const c=canModify(x);return`<tr><td><span class="dchip">${fmt(x.date)}</span></td><td style="font-weight:600;">${x.nom||''} ${x.prenom||''}</td><td>${x.client||''}</td><td style="font-size:10px;">${(x.naturesLesion||[]).slice(0,2).join(', ')||'—'}</td><td><span class="badge ${gB[x.gravite]||'b-gray'}">${x.gravite||'—'}</span></td><td>${x.arret==='Oui'?`<span class="badge b-red">${x.dureeArret||'?'}j</span>`:'—'}</td><td><span class="badge ${cB[x.declareCNSS]||'b-gray'}">${x.declareCNSS||'Non'}</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-xs btn-out" onclick="voirActe('${x.id}','accident')">Voir</button>${c?`<button class="btn btn-xs btn-out" onclick="voirActeEditMode('${x.id}','accident')">✎</button>`:''}<button class="btn btn-xs btn-out" onclick="ouvrirDossier('${x.nom||''}','${x.prenom||''}')">Dossier</button>${c?`<button class="btn-del" onclick="supprimerActe('${x.id}','accident')">✕</button>`:''}</div></td></tr>`}).join(''):'<tr><td colspan="8" class="tbl-empty">Aucun accident déclaré.</td></tr>';
 }
 
 function renderRapportPage(){
@@ -1546,10 +1559,19 @@ function openPanel(type){
   const def=FORMS_DEF[type];
   document.getElementById('fp-title').textContent=def.title;
   document.getElementById('fp-sub').textContent=def.sub;
-  CSTEPS=def.steps;renderStep();
+  CSTEPS=buildStepsWithCustomFields(type,def.steps);renderStep();
   document.getElementById('form-panel').classList.add('open');
 }
-function closePanel(){document.getElementById('form-panel').classList.remove('open');CF=null;}
+function buildStepsWithCustomFields(type,baseSteps){
+  const steps=baseSteps.map(s=>({...s,fields:[...s.fields]}));
+  (S.customFields?.[type]||[]).forEach(cf=>{
+    let target=steps[steps.length-1];
+    if(cf.sectionId){const sec=(S.formSections?.[type]||[]).find(s=>s.id===cf.sectionId);if(sec){const m=steps.find(s=>s.name===sec.nom);if(m)target=m;}}
+    if(!target.fields.find(f=>f.k===cf.key)){const opts=cf.options?.length?cf.options:null;target.fields.push({k:cf.key,l:cf.label,t:cf.type,req:cf.required||false,opts:opts?(()=>opts):undefined});}
+  });
+  return steps;
+}
+function closePanel(){document.getElementById('form-panel').classList.remove('open');CF=null;if(typeof restoreDuerFooter==='function')restoreDuerFooter();}
 
 function buildStepInd(){
   if(CSTEPS.length<=1){document.getElementById('fp-steps').innerHTML='';return;}
@@ -1895,12 +1917,14 @@ function renderStep(){
   html+='</div>';
   document.getElementById('fp-content').innerHTML=html;
   const df=document.getElementById('ff-date');if(df&&!FDATA.date)df.value=new Date().toISOString().split('T')[0];
+  step.fields.forEach(f=>{if(!f.k)return;const el=document.getElementById('ff-'+f.k);if(!el)return;if(el.tagName==='SELECT'&&FDATA[f.k])el.value=FDATA[f.k];if(el.type==='date'&&FDATA[f.k])el.value=FDATA[f.k].split('T')[0];});
   if(CF==='facture'&&CSTEP===1)renderLignes();
   buildStepInd();
   const isLast=CSTEP===CSTEPS.length-1;
-  document.getElementById('fp-prev').style.display=CSTEP===0?'none':'';
-  document.getElementById('fp-next').style.display=isLast?'none':'';
-  document.getElementById('fp-save').style.display=isLast?'':'none';
+  const prevBtn=document.getElementById('fp-prev');const nextBtn=document.getElementById('fp-next');const saveBtn=document.getElementById('fp-save');
+  if(prevBtn)prevBtn.style.display=CSTEP===0?'none':'';
+  if(nextBtn)nextBtn.style.display=isLast?'none':'';
+  if(saveBtn)saveBtn.style.display=isLast?'':'none';
 
   // Age calc listener
   setTimeout(()=>{
@@ -2367,8 +2391,14 @@ function voirActe(id, type, salId){
 
   const editBtn=document.getElementById('detail-edit-btn');
   const certBtn=document.getElementById('detail-cert-btn');
-  if(editBtn){editBtn.style.display=can?'':'none';}
-  if(certBtn){certBtn.style.display=type==='visite'?'':'none';}
+  const delBtn=document.getElementById('detail-del-btn');
+  const cancelBtn=document.getElementById('detail-cancel-btn');
+  const saveBtn2=document.getElementById('detail-save-btn');
+  if(editBtn)editBtn.style.display=can?'':'none';
+  if(certBtn)certBtn.style.display=type==='visite'?'':'none';
+  if(delBtn)delBtn.style.display=can?'':'none';
+  if(cancelBtn)cancelBtn.style.display='none';
+  if(saveBtn2)saveBtn2.style.display='none';
 
   let html='';
 
@@ -2423,7 +2453,110 @@ function voirActe(id, type, salId){
 
 function retourFiche(){
   if(CURRENT_DOSSIER_SAL_ID)ouvrirFicheSal(CURRENT_DOSSIER_SAL_ID);
-  else goTo('salaries',null);
+  else goTo(CURRENT_DETAIL_TYPE+'s',null);
+}
+
+function supprimerActe(id,type){
+  if(!confirm('Supprimer cet acte définitivement ?'))return;
+  const endpoint={consultation:'/consultations',visite:'/visites',accident:'/accidents'}[type];
+  const storeKey={consultation:'consultations',visite:'visites',accident:'accidents'}[type];
+  api('DELETE',`${endpoint}/${id}`).then(()=>{
+    S[storeKey]=S[storeKey].filter(x=>x.id!==id);
+    rebuildSalaries();toast('✓ Supprimé');
+    if(CURRENT_DOSSIER_SAL_ID)ouvrirFicheSal(CURRENT_DOSSIER_SAL_ID);
+    else goTo(type+'s',null);
+  }).catch(e=>toast('⚠ '+e.message,'var(--red)'));
+}
+function supprimerActeDetail(){supprimerActe(CURRENT_DETAIL_ID,CURRENT_DETAIL_TYPE);}
+
+function voirActeEditMode(id,type){
+  const store={consultation:'consultations',visite:'visites',accident:'accidents'};
+  const acte=S[store[type]]?.find(x=>x.id===id);
+  if(!acte)return;
+  CURRENT_DETAIL_ID=id;CURRENT_DETAIL_TYPE=type;
+  CF=type;FDATA={...acte,_editing:true,_editId:id,_client_id:acte.client_id};
+  const def=FORMS_DEF[type];
+  CSTEPS=buildStepsWithCustomFields(type,def.steps);CSTEP=0;
+  const fieldMeta={};CSTEPS.forEach(step=>step.fields.forEach(f=>{if(f.k)fieldMeta[f.k]=f;}));
+  const tLabel={consultation:'Consultation médicale',visite:'Visite médicale',accident:'Accident de travail'};
+  const tColor={consultation:'var(--teal)',visite:'var(--purple)',accident:'var(--red)'};
+  const sections=FIELD_SECTIONS[type]||[];
+  const isFullKey=k=>['antMed','antChir','motif','interrogatoire','signesCliniques','hypothese','traitement','description','observations','observationsCliniques','restrictions','natureAmenagement','soinsImmed','tache','temoins'].includes(k);
+  document.getElementById('detail-title').textContent=`Modifier — ${acte.prenom||''} ${acte.nom||''}`;
+  document.getElementById('detail-sub').textContent=`${acte.client||'—'} · ${fmt(acte.date)}`;
+  document.getElementById('detail-edit-btn').style.display='none';
+  document.getElementById('detail-del-btn').style.display='none';
+  document.getElementById('detail-cert-btn').style.display='none';
+  document.getElementById('detail-cancel-btn').style.display='';
+  document.getElementById('detail-save-btn').style.display='';
+  let html='';
+  sections.forEach(sec=>{
+    html+=`<div class="detail-card"><div class="detail-hdr"><div class="detail-hdr-title">${sec.title}</div><div class="detail-hdr-meta" style="color:${tColor[type]};">${tLabel[type]}</div></div><div class="detail-fields">`;
+    sec.fields.forEach(k=>{
+      const label=FIELD_LABELS[k]||k;const f=fieldMeta[k];const raw=acte[k];
+      const val=Array.isArray(raw)?raw.join(', '):(raw||'');
+      let inp='';
+      if(f?.t==='select'){const opts=f.opts?f.opts():[];inp=`<select id="de-${k}"><option value="">—</option>${opts.map(o=>`<option value="${o}"${val===o?' selected':''}>${o}</option>`).join('')}</select>`;}
+      else if(f?.t==='textarea'||isFullKey(k)){inp=`<textarea id="de-${k}">${val}</textarea>`;}
+      else if(k==='date'||k==='dateNaissance'||k==='prochaineVisite'){inp=`<input type="date" id="de-${k}" value="${raw?(raw+'').split('T')[0]:''}">`;}
+      else{inp=`<input type="text" id="de-${k}" value="${val.replace(/"/g,'&quot;')}">`;}
+      html+=`<div class="detail-field${isFullKey(k)?' full':''}"><div class="detail-field-label">${label}</div>${inp}</div>`;
+    });
+    (S.customFields[type]||[]).forEach(cf=>{
+      const val=(acte[cf.key]||'');
+      const lbl=`${cf.label} <span style="color:var(--purple);font-size:8px;">Personnalisé</span>`;
+      let inp='';
+      if(cf.type==='textarea'){
+        inp=`<textarea id="de-${cf.key}">${val}</textarea>`;
+      }else if(cf.type==='date'){
+        inp=`<input type="date" id="de-${cf.key}" value="${val?(val+'').split('T')[0]:''}">`;
+      }else if(cf.type==='select'){
+        const opts=cf.options||[];
+        inp=`<select id="de-${cf.key}"><option value="">—</option>${opts.map(o=>`<option value="${o}"${val===o?' selected':''}>${o}</option>`).join('')}</select>`;
+      }else if(cf.type==='yesno'){
+        inp=`<select id="de-${cf.key}"><option value="">—</option><option value="Oui"${val==='Oui'?' selected':''}>Oui</option><option value="Non"${val==='Non'?' selected':''}>Non</option></select>`;
+      }else if(cf.type==='check'){
+        const opts=cf.options||[];
+        const selected=Array.isArray(acte[cf.key])?acte[cf.key]:(val?val.split(', '):[]);
+        inp=`<div style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">${opts.map(o=>`<label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;"><input type="checkbox" value="${o}" ${selected.includes(o)?'checked':''} onchange="(function(el){const g=el.closest('.detail-field').querySelectorAll('input[type=checkbox]');const v=Array.from(g).filter(x=>x.checked).map(x=>x.value);el.closest('.detail-field').dataset.cfval=v.join(', ');})(this)" style="width:auto;border:none;">${o}</label>`).join('')}</div>`;
+      }else{
+        inp=`<input type="text" id="de-${cf.key}" value="${(val+'').replace(/"/g,'&quot;')}">`;
+      }
+      html+=`<div class="detail-field" data-cfkey="${cf.key}"><div class="detail-field-label">${lbl}</div>${inp}</div>`;
+    });
+    html+='</div></div>';
+  });
+  document.getElementById('detail-content').innerHTML=html;
+  goTo('detail-acte',null);
+}
+
+async function saveEditDetail(id,type){
+  const store={consultation:'consultations',visite:'visites',accident:'accidents'};
+  const endpoint={consultation:'/consultations',visite:'/visites',accident:'/accidents'}[type];
+  const normFn={consultation:normConsultation,visite:normVisite,accident:normAccident}[type];
+  const acte=S[store[type]]?.find(x=>x.id===id);if(!acte)return;
+  const{byName}=clientMap();const body={};
+  CSTEPS.forEach(step=>step.fields.forEach(f=>{
+    if(!f.k||f.sep||f.t==='lignes'||f.t==='salSearch'||f.t==='audioTextarea'||f.t==='ageCalc')return;
+    const el=document.getElementById('de-'+f.k);if(el)body[f.k]=el.value||null;
+  }));
+  body.client_id=byName[acte.client]||acte.client_id;
+  const cfVals={};
+  (S.customFields?.[type]||[]).forEach(cf=>{
+    if(cf.type==='check'){
+      const container=document.querySelector(`.detail-field[data-cfkey="${cf.key}"]`);
+      if(container){const checked=Array.from(container.querySelectorAll('input[type=checkbox]:checked')).map(x=>x.value);if(checked.length)cfVals[cf.key]=checked;}
+    }else{
+      const el=document.getElementById('de-'+cf.key);
+      if(el&&el.value)cfVals[cf.key]=el.value;
+    }
+  });
+  if(Object.keys(cfVals).length)body.custom_fields=cfVals;
+  try{
+    const data=await api('PATCH',`${endpoint}/${id}`,body);
+    if(data){const arr=S[store[type]];const idx=arr.findIndex(x=>x.id===id);if(idx>-1)arr[idx]=normFn(data);rebuildSalaries();}
+    CF=null;toast('✓ Modifié avec succès');voirActe(id,type,CURRENT_DOSSIER_SAL_ID);
+  }catch(e){toast('⚠ '+e.message,'var(--red)');}
 }
 
 function genCertificatFromDetail(){
@@ -2445,7 +2578,7 @@ function modifierActeId(id,type){
   const def=FORMS_DEF[type];
   document.getElementById('fp-title').textContent='Modifier — '+def.title;
   document.getElementById('fp-sub').textContent=`Modification de l'acte du ${fmt(acte.date)} · délai restant : ${daysLeft(acte)||'illimité (admin)'} jours`;
-  CSTEPS=def.steps;renderStep();
+  CSTEPS=buildStepsWithCustomFields(type,def.steps);renderStep();
   document.getElementById('form-panel').classList.add('open');
 }
 
@@ -2459,6 +2592,8 @@ async function saveForm(){
     const endpoint={consultation:'/consultations',visite:'/visites',accident:'/accidents'}[CF];
     const normFn={consultation:normConsultation,visite:normVisite,accident:normAccident}[CF];
     const body={...buildActBody(CF),client_id:byName[FDATA.client]||FDATA._client_id};
+    const cfEdit={};(S.customFields?.[CF]||[]).forEach(f=>{if(FDATA[f.key]!==undefined&&FDATA[f.key]!=='')cfEdit[f.key]=FDATA[f.key];});
+    if(Object.keys(cfEdit).length)body.custom_fields=cfEdit;
     try{
       const data=await api('PATCH',`${endpoint}/${FDATA._editId}`,body);
       if(data){
@@ -2467,11 +2602,11 @@ async function saveForm(){
         if(idx>-1)arr[idx]=normFn(data);
         rebuildSalaries();
       }
-      closePanel();toast('✓ Acte modifié avec succès');
+      const savedCF=CF;closePanel();toast('✓ Acte modifié avec succès');
       if(CURRENT_DOSSIER_SAL_ID)setTimeout(()=>ouvrirFicheSal(CURRENT_DOSSIER_SAL_ID),100);
-      else if(CF==='visite')renderVisites();
-      else if(CF==='consultation')renderConsultations();
-      else if(CF==='accident')renderAccidents();
+      else if(savedCF==='visite')renderVisites();
+      else if(savedCF==='consultation')renderConsultations();
+      else if(savedCF==='accident')renderAccidents();
     }catch(e){toast('⚠ '+e.message,'var(--red)');}
     return;
   }
@@ -2510,17 +2645,20 @@ async function saveForm(){
       const storeKey={consultation:'consultations',visite:'visites',accident:'accidents'}[CF];
       const body={...buildActBody(CF),client_id:clientId};
       if(FDATA._salId)body.salarie_id=FDATA._salId;
+      const cfCreate={};(S.customFields?.[CF]||[]).forEach(f=>{if(FDATA[f.key]!==undefined&&FDATA[f.key]!=='')cfCreate[f.key]=FDATA[f.key];});
+      if(Object.keys(cfCreate).length)body.custom_fields=cfCreate;
       const data=await api('POST',endpoint,body);
       if(data){S[storeKey].unshift(normFn(data));rebuildSalaries();}
     }
+    const dest=nav[CF];const destLbl=navLbl[dest];
     closePanel();
-    goTo(nav[CF],null);
+    goTo(dest,null);
     document.querySelectorAll('.ni').forEach(b=>{
       const lbl=b.querySelector('.ni-lbl')?.textContent;
-      if(navLbl[nav[CF]]&&lbl===navLbl[nav[CF]])b.classList.add('active');else b.classList.remove('active');
+      if(destLbl&&lbl===destLbl)b.classList.add('active');else b.classList.remove('active');
     });
     toast('✓ Enregistré avec succès');
-    if(CF==='facture'&&S.factures[0])setTimeout(()=>afficherFacture(S.factures[0].id),200);
+    if(dest==='facturation'&&S.factures[0])setTimeout(()=>afficherFacture(S.factures[0].id),200);
   }catch(e){toast('⚠ '+e.message,'var(--red)');}
 }
 
@@ -2543,5 +2681,7 @@ async function saveForm(){
 })();
 </script>
 <script src="duer_module.js"></script>
+<script src="form_editor_module.js"></script>
+<script src="period_filter_module.js"></script>
 </body>
 </html>

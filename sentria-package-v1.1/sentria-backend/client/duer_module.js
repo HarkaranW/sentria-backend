@@ -71,16 +71,16 @@ function duerOpenPanel(title, sub, bodyHTML, footerHTML) {
   document.getElementById('form-panel').classList.add('open');
 }
 
-function duerClosePanel() {
+function restoreDuerFooter() {
   if (_duerSavedFooter !== null) {
     document.getElementById('fp-foot').innerHTML = _duerSavedFooter;
     _duerSavedFooter = null;
   }
-  if (typeof closePanel === 'function') {
-    closePanel();
-  } else {
-    document.getElementById('form-panel').classList.remove('open');
-  }
+}
+
+function duerClosePanel() {
+  restoreDuerFooter();
+  closePanel();
 }
 
 // ── HELPERS API ──────────────────────────────────────────
@@ -239,8 +239,7 @@ function duerRenderDetail() {
       <td><div style="display:flex;gap:4px;">
         <button class="btn btn-xs btn-out" onclick="duerOpenPlan('${r.id}')">Plan</button>
         <button class="btn btn-xs btn-ghost" onclick="duerEditRisk('${r.id}')">✎</button>
-        <button class="btn btn-xs" style="background:var(--red3);color:var(--red);border:1px solid var(--red);border-radius:6px;font-size:10px;font-weight:600;padding:4px 8px;cursor:pointer;"
-          onclick="duerDeleteRisk('${r.id}')">✕</button>
+        <button class="btn btn-xs btn-del" onclick="duerDeleteRisk('${r.id}')">✕</button>
       </div></td>
     </tr>`;
   }).join('') :

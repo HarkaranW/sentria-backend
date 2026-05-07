@@ -115,11 +115,13 @@ function makeCrudRouter(router, tableName, columns, requiredCols) {
     }
   });
 
-  // DELETE /:id — admin only soft delete
+  // DELETE /:id — admin can delete anything; others can delete their own within 30 days
   router.delete('/:id', async (req, res) => {
-    if (req.user.role !== 'admin')
-      return res.status(403).json({ success: false, error: 'Admin requis' });
     try {
+      const { rows: existing } = await pool.query(`SELECT * FROM ${tableName} WHERE id = $1`, [req.params.id]);
+      if (!existing.length) return res.status(404).json({ success: false, error: 'Introuvable' });
+      if (!canModify(existing[0], req.user))
+        return res.status(403).json({ success: false, error: 'Suppression refusée — délai dépassé ou accès insuffisant' });
       await pool.query(`DELETE FROM ${tableName} WHERE id = $1`, [req.params.id]);
       res.json({ success: true, data: { deleted: true } });
     } catch (err) {
